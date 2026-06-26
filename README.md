@@ -43,7 +43,7 @@ pip install opencv-python Flask flask-cors ultralytics numpy
 ```bash
 python detect_backend.py
 ```
-This runs the local Flask API and video streaming server on **[http://localhost:5000](http://localhost:5000)**. It will automatically download YOLOv8 nano weights (`yolov8n.pt`) on first run if they are not already cached.
+This runs the local Flask API and video streaming server. It will automatically download YOLOv8 nano weights (`yolov8n.pt`) on first run if they are not already cached.
 
 ### Step 3: Start the Web Dashboard Server
 In a separate terminal shell:
@@ -51,6 +51,6 @@ In a separate terminal shell:
 # In the project directory
 python -m http.server 8000
 ```
-Open **[http://localhost:8000](http://localhost:8000)** in your web browser. 
+Open the local host port 8000in your web browser. 
 
 The dashboard will detect the backend server on startup, connect automatically, and stream threats live from the camera pipeline!
