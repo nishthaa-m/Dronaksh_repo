@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dronaksh — AI-Powered Swarm Drone Surveillance Control Room for real-time crowd event monitoring">
+  <title>Dronaksh | Swarm Surveillance Control Room</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Emergency Lockdown Banner -->
+  <div class="lockdown-banner" id="lockdown-banner">
+    ⚠ EMERGENCY LOCKDOWN — ALL DRONES GROUNDED — FEEDS OFFLINE ⚠
+    <button onclick="disengageLockdown()">DISENGAGE</button>
+  </div>
+
+  <!-- App Shell -->
+  <div class="app-shell">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="sidebar">
+      <!-- Brand -->
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <i data-lucide="shield-alert"></i>
+        </div>
+        <span class="brand-name">DRONAKSH</span>
+        <span class="brand-version">v2.1</span>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <a class="nav-link active" id="nav-liveops" onclick="switchView('liveops')">
+          <i data-lucide="monitor"></i>
+          <span>Live Operations</span>
+        </a>
+        <a class="nav-link" id="nav-reports" onclick="openModal('reports')">
+          <i data-lucide="file-text"></i>
+          <span>Incident Reports</span>
+        </a>
+        <a class="nav-link" id="nav-settings" onclick="openModal('settings')">
+          <i data-lucide="sliders-horizontal"></i>
+          <span>Configuration</span>
+        </a>
+      </nav>
+
+      <div class="nav-divider"></div>
+
+      <!-- Fleet Quick Cards -->
+      <div class="sidebar-fleet">
+        <div class="sidebar-fleet-title">Fleet Status</div>
+        <div class="fleet-mini-card" id="fleet-card-1">
+          <div class="fleet-led online" id="fleet-led-1"></div>
+          <div class="fleet-mini-info">
+            <div class="fleet-mini-name">Alpha</div>
+            <div class="fleet-mini-task" id="fleet-task-1">Patrol — Gate 1</div>
+          </div>
+          <div class="fleet-mini-battery healthy" id="fleet-bat-1">92%</div>
+        </div>
+        <div class="fleet-mini-card" id="fleet-card-2">
+          <div class="fleet-led online" id="fleet-led-2"></div>
+          <div class="fleet-mini-info">
+            <div class="fleet-mini-name">Bravo</div>
+            <div class="fleet-mini-task" id="fleet-task-2">Patrol — Stage A</div>
+          </div>
+          <div class="fleet-mini-battery healthy" id="fleet-bat-2">87%</div>
+        </div>
+        <div class="fleet-mini-card" id="fleet-card-3">
+          <div class="fleet-led online" id="fleet-led-3"></div>
+          <div class="fleet-mini-info">
+            <div class="fleet-mini-name">Charlie</div>
+            <div class="fleet-mini-task" id="fleet-task-3">Patrol — Food Court</div>
+          </div>
+          <div class="fleet-mini-battery healthy" id="fleet-bat-3">74%</div>
+        </div>
+        <div class="fleet-mini-card" id="fleet-card-4">
+          <div class="fleet-led online" id="fleet-led-4"></div>
+          <div class="fleet-mini-info">
+            <div class="fleet-mini-name">Delta</div>
+            <div class="fleet-mini-task" id="fleet-task-4">Patrol — Parking E</div>
+          </div>
+          <div class="fleet-mini-battery healthy" id="fleet-bat-4">96%</div>
+        </div>
+      </div>
+
+      <!-- System Health -->
+      <div class="sidebar-footer">
+        <div class="sys-health-row">
+          <span class="sys-health-label">Network</span>
+          <span class="sys-health-val" id="sys-network">
+            <span class="fleet-led online" style="width:6px;height:6px;"></span> ONLINE
+          </span>
+        </div>
+        <div class="sys-health-row">
+          <span class="sys-health-label">AI Pipeline</span>
+          <span class="sys-health-val" style="color:var(--green);">YOLOv8 + ResNet</span>
+        </div>
+        <div class="sys-health-row">
+          <span class="sys-health-label">Uptime</span>
+          <span class="sys-health-val" id="sys-uptime">03h 14m 22s</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===================== TOPBAR ===================== -->
+    <header class="topbar">
+      <div class="topbar-event">
+        <span class="event-name" id="event-name">Kumbh Mela 2026 — Sector 4B</span>
+        <span class="defcon-badge green" id="defcon-badge">NORMAL</span>
+      </div>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="topbar-stats">
+        <div class="top-stat">
+          <span class="top-stat-val" id="stat-active-drones" style="color:var(--green);">4</span>
+          <span class="top-stat-label">Drones</span>
+        </div>
+        <div class="top-stat">
+          <span class="top-stat-val" id="stat-incidents-today" style="color:var(--amber);">7</span>
+          <span class="top-stat-label">Incidents</span>
+        </div>
+        <div class="top-stat">
+          <span class="top-stat-val" id="stat-resolved" style="color:var(--green);">5</span>
+          <span class="top-stat-label">Resolved</span>
+        </div>
+        <div class="top-stat">
+          <span class="top-stat-val" id="stat-crowd-density">38K</span>
+          <span class="top-stat-label">Est. Crowd</span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="topbar-btn" id="audio-btn" onclick="toggleMute()" title="Toggle Audio Alerts">
+          <i data-lucide="volume-2"></i>
+        </button>
+        <button class="topbar-btn emergency" id="lockdown-btn" onclick="triggerLockdown()" title="Emergency Lockdown">
+          <i data-lucide="octagon" style="width:13px;height:13px;"></i>
+          LOCKDOWN
+        </button>
+      </div>
+
+      <div class="topbar-clock" id="live-clock">22:51:59</div>
+    </header>
+
+    <!-- ===================== MAIN WORKSPACE ===================== -->
+    <main class="workspace" id="workspace">
+
+      <!-- 1. LIVE FEEDS (top-left) -->
+      <div class="card feeds-card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <i data-lucide="video" style="color:var(--accent);"></i>
+            <span class="card-head-title">Live Aerial Feeds</span>
+          </div>
+          <div class="card-head-right">
+            <span style="font-size:0.62rem;font-family:var(--font-mono);color:var(--green);">AI DETECTION ON</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="feeds-grid">
+            <div class="feed-cell" id="feed-cell-1" onclick="zoomFeed(1)">
+              <span class="feed-label">ALPHA — Gate 1</span>
+              <span class="feed-rec"><span class="rec-dot"></span>REC</span>
+              <canvas class="feed-canvas" id="feed-canvas-1"></canvas>
+            </div>
+            <div class="feed-cell" id="feed-cell-2" onclick="zoomFeed(2)">
+              <span class="feed-label">BRAVO — Stage A</span>
+              <span class="feed-rec"><span class="rec-dot"></span>REC</span>
+              <canvas class="feed-canvas" id="feed-canvas-2"></canvas>
+            </div>
+            <div class="feed-cell" id="feed-cell-3" onclick="zoomFeed(3)">
+              <span class="feed-label">CHARLIE — Food Court</span>
+              <span class="feed-rec"><span class="rec-dot"></span>REC</span>
+              <canvas class="feed-canvas" id="feed-canvas-3"></canvas>
+            </div>
+            <div class="feed-cell" id="feed-cell-4" onclick="zoomFeed(4)">
+              <span class="feed-label">DELTA — Parking E</span>
+              <span class="feed-rec"><span class="rec-dot"></span>REC</span>
+              <canvas class="feed-canvas" id="feed-canvas-4"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. TACTICAL MAP (bottom-left) -->
+      <div class="card map-card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <i data-lucide="map" style="color:var(--green);"></i>
+            <span class="card-head-title">Tactical Overlay — Crowd Heatmap</span>
+          </div>
+          <div class="card-head-right">
+            <span style="font-size:0.62rem;font-family:var(--font-mono);color:var(--text-muted);" id="map-sector">Sector 4-B • 12.9716°N 77.5946°E</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="map-canvas-wrap">
+            <canvas id="tactical-canvas"></canvas>
+            <div class="map-legend">
+              <span class="map-legend-item"><span class="legend-dot" style="background:var(--red);"></span> Threat</span>
+              <span class="map-legend-item"><span class="legend-dot" style="background:var(--accent);"></span> Drone</span>
+              <span class="map-legend-item"><span class="legend-dot" style="background:var(--amber);"></span> Crowd Hot</span>
+              <span class="map-legend-item"><span class="legend-dot" style="background:var(--green);"></span> Sparse</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. INCIDENT QUEUE (right, top) -->
+      <div class="card incidents-card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <i data-lucide="alert-triangle" style="color:var(--red);"></i>
+            <span class="card-head-title">Incident Queue</span>
+          </div>
+          <div class="card-head-right">
+            <span class="alert-count-badge clear" id="alert-count">0</span>
+          </div>
+        </div>
+        <div class="incidents-body" id="incidents-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 4. FLEET CONTROL (right, bottom) -->
+      <div class="card fleet-card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <i data-lucide="plane" style="color:var(--cyan);transform:rotate(45deg);"></i>
+            <span class="card-head-title">Fleet Command</span>
+          </div>
+          <div class="card-head-right">
+            <span style="font-size:0.62rem;font-family:var(--font-mono);color:var(--green);" id="fleet-count">4/4 ACTIVE</span>
+          </div>
+        </div>
+        <div class="fleet-body" id="fleet-body">
+          <!-- Populated by JS -->
+        </div>
+        <div class="fleet-controls">
+          <div class="formation-row" id="formation-row">
+            <button class="formation-pill active" id="form-perimeter" onclick="setFormation('perimeter')">Perimeter</button>
+            <button class="formation-pill" id="form-grid" onclick="setFormation('grid')">Grid Scan</button>
+            <button class="formation-pill" id="form-orbit" onclick="setFormation('orbit')">Orbit</button>
+            <button class="formation-pill" id="form-target" onclick="setFormation('target')">Focus</button>
+          </div>
+          <div class="altitude-row">
+            <span>Altitude</span>
+            <input type="range" min="10" max="100" value="30" id="altitude-slider" oninput="setAltitude(this.value)">
+            <span class="altitude-val" id="altitude-val">30m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. ACTIVITY LOG (bottom, full-width) -->
+      <div class="card log-card">
+        <div class="card-head">
+          <div class="card-head-left">
+            <i data-lucide="terminal" style="color:var(--text-muted);"></i>
+            <span class="card-head-title">Activity Log</span>
+          </div>
+          <div class="card-head-right">
+            <button class="export-btn" onclick="clearLog()" style="font-size:0.62rem;padding:0.25rem 0.5rem;">Clear</button>
+          </div>
+        </div>
+        <div class="log-body" id="activity-log">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===================== MODAL: REPORTS ===================== -->
+  <div class="modal-overlay" id="modal-reports">
+    <div class="modal-panel" style="max-width:1000px;">
+      <div class="modal-head">
+        <div class="modal-title">
+          <i data-lucide="file-text" style="color:var(--accent);"></i>
+          Incident Reports & Audit Trail
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <button class="export-btn" onclick="exportCSV()">
+            <i data-lucide="download"></i> Export CSV
+          </button>
+          <button class="modal-close" onclick="closeModal('reports')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="reports-stats-row" id="report-stats">
+          <!-- Populated by JS -->
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="reports-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Drone</th>
+                <th>Incident Type</th>
+                <th>Confidence</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Action Taken</th>
+              </tr>
+            </thead>
+            <tbody id="reports-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: SETTINGS ===================== -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal-panel" style="max-width:750px;">
+      <div class="modal-head">
+        <div class="modal-title">
+          <i data-lucide="sliders-horizontal" style="color:var(--accent);"></i>
+          System Configuration
+        </div>
+        <button class="modal-close" onclick="closeModal('settings')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-grid">
+          <div class="settings-section">
+            <div class="settings-section-title">AI Detection Thresholds</div>
+            <div class="setting-item">
+              <label class="setting-label">YOLOv8 Confidence Threshold (<span id="yolo-val">65</span>%)</label>
+              <input type="range" class="setting-input" style="padding:0;" min="30" max="95" value="65" id="yolo-slider"
+                oninput="document.getElementById('yolo-val').innerText=this.value">
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">ResNet Classification Margin (<span id="resnet-val">75</span>%)</label>
+              <input type="range" class="setting-input" style="padding:0;" min="40" max="98" value="75" id="resnet-slider"
+                oninput="document.getElementById('resnet-val').innerText=this.value">
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">Feed Resolution</label>
+              <select class="setting-select" id="resolution-select">
+                <option value="1080p">1080p — 30 FPS</option>
+                <option value="720p" selected>720p — 25 FPS</option>
+                <option value="480p">480p — 15 FPS (Low Bandwidth)</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title">Control Room Preferences</div>
+            <div class="setting-item">
+              <label class="setting-toggle">
+                <input type="checkbox" id="setting-siren" checked>
+                Enable emergency sirens
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="setting-toggle">
+                <input type="checkbox" id="setting-auto-dispatch">
+                Auto-reroute nearest drone on critical alert
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">Swarm API Endpoint</label>
+              <input type="text" class="setting-input" id="api-endpoint" value="http://localhost:5000/api/threats">
+            </div>
+            <button class="settings-save-btn" onclick="saveSettings()" style="margin-top: 0.5rem; width: 100%;">Save Configuration</button>
+          </div>
+          
+          <!-- AI Model Upload & Management -->
+          <div class="settings-section" style="grid-column: 1 / -1; margin-top: 1rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+            <div class="settings-section-title">AI Model Upload & Management</div>
+            <div class="model-manager-grid">
+              <div class="model-status-card">
+                <div class="model-status-row">
+                  <span class="model-status-label">Active Weights:</span>
+                  <span class="model-status-val" id="active-model-name" style="color:var(--accent); font-weight:600;">yolov8n.pt (fallback)</span>
+                </div>
+                <div class="model-status-row">
+                  <span class="model-status-label">Device:</span>
+                  <span class="model-status-val" id="model-device">CPU (Simulated)</span>
+                </div>
+                <div class="model-status-row">
+                  <span class="model-status-label">Inference:</span>
+                  <span class="model-status-val" id="model-latency">4ms</span>
+                </div>
+                <div class="model-status-row">
+                  <span class="model-status-label">Framework:</span>
+                  <span class="model-status-val" id="model-framework" style="color:var(--text-secondary);">Simulated CV Inference</span>
+                </div>
+              </div>
+              <div class="model-upload-zone" id="model-upload-zone" onclick="document.getElementById('model-file-input').click()">
+                <i data-lucide="upload-cloud" style="width:32px;height:32px;color:var(--text-secondary);margin-bottom:0.4rem;"></i>
+                <span>Drag & Drop custom <b>.pt</b> model weights here</span>
+                <span style="font-size:0.75rem;color:var(--text-muted); margin-top:2px;">or click to browse local files</span>
+                <input type="file" id="model-file-input" style="display:none;" accept=".pt,.weights" onchange="uploadModelFile(this.files[0])">
+                
+                <div class="progress-bar-wrap" id="upload-progress-wrap" style="display:none; width: 85%; margin-top: 0.6rem;">
+                  <div class="progress-bar-track" style="height: 6px;">
+                    <div class="progress-bar-fill" id="upload-progress-fill" style="width:0%; background:var(--accent);"></div>
+                  </div>
+                  <span class="progress-bar-val" id="upload-progress-val" style="font-size:0.75rem; margin-top: 3px;">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: CROSS-VERIFICATION ===================== -->
+  <div class="modal-overlay" id="modal-verify">
+    <div class="modal-panel" style="max-width:1050px; width:95%;">
+      <div class="modal-head">
+        <div class="modal-title">
+          <i data-lucide="shield-alert" style="color:var(--red);"></i>
+          Incident Verification & False Positive Control
+        </div>
+        <button class="modal-close" onclick="closeVerificationModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="verify-layout">
+          <!-- Live Feed vs Baseline -->
+          <div class="verify-media-container">
+            <div class="verify-media-box">
+              <div class="verify-media-title">Live AI Camera Feed (Drone Charlie)</div>
+              <!-- This image points to the backend video feed -->
+              <img id="verify-live-feed" src="" alt="Live feed loading or offline..." class="verify-img" />
+              <div class="feed-overlay-text" id="verify-hud-text">ALT: 30m | FPS: 15</div>
+            </div>
+            <div class="verify-media-box">
+              <div class="verify-media-title">Sector Baseline (Reference View)</div>
+              <div class="verify-baseline-wrap">
+                <!-- Fallback background when no image or showing simulated schematic crowd baseline -->
+                <canvas id="verify-baseline-canvas" class="verify-img"></canvas>
+                <div class="baseline-overlay-label">BASELINE CALIBRATION OK</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Checklist & Actions -->
+          <div class="verify-controls-panel">
+            <div class="verify-meta-info">
+              <div class="verify-meta-title" id="verify-incident-type">Weapon Detected</div>
+              <div class="verify-meta-sub" id="verify-incident-details">INC-1002 • Detected by Drone Charlie in Food Court West</div>
+            </div>
+            
+            <div class="checklist-section">
+              <div class="checklist-title">Pre-Action Verification Checklist</div>
+              <label class="checklist-item">
+                <input type="checkbox" id="check-shadow">
+                <span>Shadow / reflection artifact check passed</span>
+              </label>
+              <label class="checklist-item">
+                <input type="checkbox" id="check-object">
+                <span>Object shape is consistent with weapon classification</span>
+              </label>
+              <label class="checklist-item">
+                <input type="checkbox" id="check-context">
+                <span>No surrounding vendor grills (cooking smoke check)</span>
+              </label>
+              <label class="checklist-item">
+                <input type="checkbox" id="check-behavior">
+                <span>Crowd behavior shows flight or defensive response</span>
+              </label>
+            </div>
+            
+            <div class="dismiss-reason-section">
+              <div class="checklist-title">If Dismissing, select False Positive Reason:</div>
+              <select class="setting-select" id="fp-reason-select" style="margin-bottom:1rem; width:100%; height:34px;">
+                <option value="Cooking Smoke (Vendor grill)">Cooking Smoke (Vendor grill)</option>
+                <option value="Replica / Toy Weapon / Flagpole">Replica / Toy Weapon / Flagpole</option>
+                <option value="Playful Dancing / Hugging (False Violence)">Playful Dancing / Hugging (False Violence)</option>
+                <option value="Camera Glitch / Lens Flare / Compression">Camera Glitch / Lens Flare / Compression</option>
+                <option value="Unattended Bag is Staff Equipment">Unattended Bag is Staff Equipment</option>
+                <option value="Other / Unspecified">Other / Unspecified</option>
+              </select>
+            </div>
+            
+            <div class="verify-action-buttons">
+              <button class="verify-btn btn-dismiss-fp" onclick="dismissVerificationFP()">
+                <i data-lucide="x-circle"></i> Dismiss as False Positive
+              </button>
+              <button class="verify-btn btn-confirm-real" onclick="confirmVerificationReal()">
+                <i data-lucide="check-square"></i> Confirm & Dispatch Swarm
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== FEED ZOOM OVERLAY ===================== -->
+  <div class="feed-zoom-overlay" id="feed-zoom" onclick="closeFeedZoom()">
+    <canvas id="zoom-canvas"></canvas>
+  </div>
+
+  <!-- ===================== TOAST CONTAINER ===================== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- External Libraries & App Logic -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
